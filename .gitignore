@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+build/
+DerivedData/
+*.swp
+
+# CocoaPods (not used but defensive)
+Pods/
+
+# Swift Package Manager
+.swiftpm/
+.build/
+Package.resolved
+
+# Secrets — never commit
+.env.local
+.env
+CoffeeMo/Configuration/Secrets.swift
+Firmware/**/secrets.h
+*.xcconfig.local
+
+# Thesis intermediate files
+Thesis/*.html
+Thesis/Chapter4-additions.docx
+Thesis/Chapter4-additions.pdf

@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct CoffeeMoApp: App {
+    @StateObject private var systemVM = IoTSystemViewModel()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(systemVM)
         }
     }
 }
