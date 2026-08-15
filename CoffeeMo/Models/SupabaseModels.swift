@@ -132,3 +132,15 @@ struct ActuatorEventRow: Codable, Identifiable, Hashable {
         case triggeredBy = "triggered_by"
     }
 }
+
+struct ActuatorCommandInsert: Encodable {
+    let actuatorId: String
+    let command: String
+    let requestedBy: String
+
+    enum CodingKeys: String, CodingKey {
+        case actuatorId = "actuator_id"
+        case command
+        case requestedBy = "requested_by"
+    }
+}

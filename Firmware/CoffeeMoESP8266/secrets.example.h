@@ -5,8 +5,8 @@
 
 #pragma once
 
-const char* WIFI_SSID = "CANALBOX-5AAC-2G";
-const char* WIFI_PASSWORD = "f8SxSaU6Nb";
+const char* WIFI_SSID = "YOUR_WIFI_NAME";
+const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
 
-const char* SUPABASE_URL = "https://imbgvioqerwcjrpncngj.supabase.co";
-const char* SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltYmd2aW9xZXJ3Y2pycG5jbmdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMzkwODEsImV4cCI6MjA5NTcxNTA4MX0.NznkLacebnQcG5DDdmtnktk_U8hn9-TE8vPGNcI_LRE";
+const char* SUPABASE_URL = "https://your-project-ref.supabase.co";
+const char* SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";

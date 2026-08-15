@@ -165,6 +165,7 @@ final class IoTSystemViewModel: ObservableObject {
         pushAlert(title: "Fan Mode Changed",
                   message: "Storage fan set to \(mode.rawValue).",
                   severity: .info)
+        sendActuatorCommand(actuatorId: "FAN-01", command: mode.rawValue.lowercased())
     }
 
     func toggleGate() {
@@ -177,11 +178,13 @@ final class IoTSystemViewModel: ObservableObject {
     func deployCover() {
         guard coverState != .deployed && !coverState.isMoving else { return }
         animateCover(to: .deployed)
+        sendActuatorCommand(actuatorId: "COVER-01", command: "deployed")
     }
 
     func retractCover() {
         guard coverState != .retracted && !coverState.isMoving else { return }
         animateCover(to: .retracted)
+        sendActuatorCommand(actuatorId: "COVER-01", command: "retracted")
     }
 
     func simulateRain() {
@@ -486,6 +489,19 @@ final class IoTSystemViewModel: ObservableObject {
                           ? "Coffee beans are now protected."
                           : "Beds exposed to sunlight again.",
                       severity: .success)
+        }
+    }
+
+    private func sendActuatorCommand(actuatorId: String, command: String) {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            do {
+                try await supabaseService.sendActuatorCommand(actuatorId: actuatorId, command: command)
+            } catch {
+                pushAlert(title: "Command Sync Failed",
+                          message: "Could not send \(actuatorId) command to hardware. Check Supabase or Wi-Fi.",
+                          severity: .warning)
+            }
         }
     }
 

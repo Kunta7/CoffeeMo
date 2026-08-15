@@ -24,6 +24,7 @@ actor SupabaseService {
     private let anonKey: String
     private let session: URLSession
     private let decoder: JSONDecoder
+    private let encoder: JSONEncoder
 
     init(
         baseURL: URL = Secrets.supabaseURL,
@@ -37,6 +38,10 @@ actor SupabaseService {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601WithFractions
         self.decoder = decoder
+
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        self.encoder = encoder
     }
 
     func fetchRecentReadings(days: Int = 5) async throws -> [SensorReadingRow] {
@@ -107,6 +112,15 @@ actor SupabaseService {
         )
     }
 
+    func sendActuatorCommand(actuatorId: String, command: String) async throws {
+        let payload = ActuatorCommandInsert(
+            actuatorId: actuatorId,
+            command: command,
+            requestedBy: "ios_app"
+        )
+        try await post(path: "actuator_commands", body: payload)
+    }
+
     private func get<T: Decodable>(path: String, queryItems: [URLQueryItem]) async throws -> T {
         var components = URLComponents(url: baseURL.appending(path: "rest/v1/\(path)"), resolvingAgainstBaseURL: false)
         components?.queryItems = queryItems
@@ -126,6 +140,26 @@ actor SupabaseService {
             throw SupabaseServiceError.invalidResponse(http.statusCode)
         }
         return try decoder.decode(T.self, from: data)
+    }
+
+    private func post<T: Encodable>(path: String, body: T) async throws {
+        let url = baseURL.appending(path: "rest/v1/\(path)")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = try encoder.encode(body)
+        request.setValue(anonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("return=minimal", forHTTPHeaderField: "Prefer")
+
+        let (_, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse else {
+            throw SupabaseServiceError.invalidResponse(-1)
+        }
+        guard (200..<300).contains(http.statusCode) else {
+            throw SupabaseServiceError.invalidResponse(http.statusCode)
+        }
     }
 }
 

@@ -8,11 +8,15 @@ This folder contains the hardware firmware for Path B.
   - Upload to the **Arduino UNO R3**.
   - Reads DHT11, rain/water sensor, and PIR motion sensor.
   - Controls fan relay and cover servo.
+  - Drives a 16x2 LCD with two alternating pages (every 3 s):
+    - Page 1: temperature, humidity, FAN/MOTN flags
+    - Page 2: rain percentage and cover state
   - Sends one JSON line to ESP8266 over SoftwareSerial.
 
 - `CoffeeMoESP8266/CoffeeMoESP8266.ino`
   - Upload to the **ESP8266** board (NodeMCU / Wemos D1 mini recommended).
   - Receives JSON from the Arduino.
+  - Polls Supabase `actuator_commands` for mobile app commands and forwards them to Arduino.
   - Posts separate rows to Supabase:
     - `DHT11-01` for temperature/humidity
     - `RAIN-01` for rain value
@@ -26,6 +30,7 @@ Install these from Arduino IDE Library Manager:
 - `DHT sensor library` by Adafruit
 - `Adafruit Unified Sensor`
 - `Servo` (usually included with Arduino AVR)
+- `LiquidCrystal` (usually included with Arduino AVR — for the 16x2 LCD)
 - `ArduinoJson` by Benoit Blanchon
 
 For ESP8266 board support:
@@ -40,13 +45,24 @@ Arduino UNO R3:
 
 | Component | Arduino pin |
 |---|---|
-| DHT11 data | D2 |
-| PIR OUT | D3 |
-| Fan relay IN | D7 |
+| DHT11 data | D7 |
+| PIR OUT | D8 |
+| Fan relay IN | D10 |
 | Servo signal | D9 |
-| ESP8266 TX | D10 |
-| ESP8266 RX | D11 through voltage divider |
+| ESP8266 TX (NodeMCU D6 / GPIO12) | UNO D6 (direct wire for hardware commands) |
+| ESP8266 RX (NodeMCU D5 / GPIO14) | UNO A1 through voltage divider |
 | Rain sensor AOUT | A0 |
+
+LCD pins used by the current prototype:
+
+| LCD pin | Arduino pin |
+|---|---|
+| RS | D12 |
+| EN | D11 |
+| D4 | D5 |
+| D5 | D4 |
+| D6 | D3 |
+| D7 | D2 |
 
 Important:
 
@@ -66,6 +82,27 @@ const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
 ```
 
 The Supabase URL and anon key are already filled locally.
+
+## Bidirectional control setup
+
+Before testing mobile app control of the fan and cover, run:
+
+```text
+Supabase/actuator_commands.sql
+```
+
+in the Supabase SQL Editor. This creates the `actuator_commands` table used by the app and ESP8266.
+
+Control flow:
+
+```text
+CoffeeMo app -> actuator_commands -> ESP8266 -> Arduino UNO -> relay / servo
+```
+
+The Arduino applies manual commands for five minutes, then falls back to automatic control:
+
+- `FAN-01` commands: `on`, `off`, `auto`
+- `COVER-01` commands: `deployed`, `retracted`, `auto`
 
 ## Testing
 
