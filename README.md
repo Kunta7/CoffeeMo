@@ -178,10 +178,4 @@ Potential improvements include:
 - Role-based access control
 - Expanded industrial IoT integration
 
-## Author
 
-**Arakaza Patience**
-
-Information Technology | IT Projects | Digitalization | Automation
-
-GitHub: https://github.com/Kunta7
